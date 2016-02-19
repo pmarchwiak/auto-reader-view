@@ -81,7 +81,7 @@ function urlWithoutReader(url) {
 }
 
 function setEnabledButtonState(button, tab) {
-  button.state(tabs.activeTab, {
+  button.state(tab, {
     "label" : "Remove from Auto Reader",
     "badge" : "-",
     "badgeColor" : "red"
@@ -89,7 +89,7 @@ function setEnabledButtonState(button, tab) {
 }
 
 function setDisabledButtonState(button, tab) {
-  button.state(tabs.activeTab, {
+  button.state(tab, {
     "label" : "Add to Auto Reader",
     "badge" : "+",
     "badgeColor" : "green"

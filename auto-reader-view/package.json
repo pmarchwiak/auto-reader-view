@@ -1,14 +1,13 @@
 {
   "title": "Auto Reader View",
   "name": "auto-reader-view",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Load Reader View automatically on chosen websites.",
   "icon":"resource://@auto-reader-view/data/miu-book-icon-48.png",
   "main": "index.js",
-  "author": "Patrick Marchwiak <patrick@marchwiak.com",
+  "author": "Patrick Marchwiak",
   "engines": {
-    "firefox": ">=38.0a1",
-    "fennec": ">=38.0a1"
+    "firefox": ">=38.0a1"
   },
   "license": "MIT",
   "keywords": [
