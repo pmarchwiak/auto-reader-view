@@ -1,9 +1,9 @@
 {
   "title": "Auto Reader View",
   "name": "auto-reader-view",
-  "version": "0.0.2",
-  "description": "Load Reader View automatically on chosen websites",
-  "icon":"resource://@your-addon-name/data/miu-book-48-icon.png",
+  "version": "0.0.3",
+  "description": "Load Reader View automatically on chosen websites.",
+  "icon":"resource://@auto-reader-view/data/miu-book-icon-48.png",
   "main": "index.js",
   "author": "Patrick Marchwiak <patrick@marchwiak.com",
   "engines": {

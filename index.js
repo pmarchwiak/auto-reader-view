@@ -4,6 +4,8 @@ var self = require("sdk/self");
 var ss = require("sdk/simple-storage");
 var tabs = require("sdk/tabs");
 
+var aboutReaderPrefix = "about:reader?url=";
+
 var button = buttons.ActionButton({
   id: "auto-reader-view-link",
   label: "Always open in Reader View",
@@ -17,12 +19,15 @@ var button = buttons.ActionButton({
   badgeColor: "green"
 });
 
+var tabPast = new Set();
+
 function handleClick(state) {
   var curBadge = button.state(tabs.activeTab).badge;
   console.log("Button clicked. Current badge: " + curBadge);
   if (curBadge == "+") {
-    storeDomain(tabs.activeTab.url);
+    addDomain(tabs.activeTab.url);
     setEnabledButtonState(button, tabs.activeTab);
+    redirectToReaderView(tabs.activeTab);
   }
   else if (curBadge == "-") {
     removeDomain(tabs.activeTab.url);
@@ -34,15 +39,46 @@ function handleClick(state) {
 }
 
 tabs.on('load', function(tab) {
-  if (tab.url && isDomainMatch(tab.url)) {
+  console.log("tab load: " + tab.url);
+  if (tab.url && isDomainEnabled(tab.url)) {
     console.log("Auto reader enabled for " + tab.url);
     setEnabledButtonState(button, tab);
+    redirectToReaderView(tab);
+  }
+});
 
-    var newUrl = 'about:reader?url=' + tab.url;
+function redirectToReaderView(tab) {
+  console.log("Tab past: " + setToString(tabPast));
+  var origUrl = tab.url;
+  if (!origUrl.startsWith(aboutReaderPrefix) &&
+    tabPast.has(aboutReaderPrefix + origUrl)) {
+    // User wants to exit reader view temporarily
+    // so don't do a redirect.
+    console.log("Was already in Reader View, exit");
+    tabPast.delete(aboutReaderPrefix + origUrl);
+  }
+  else if (origUrl.startsWith(aboutReaderPrefix)) {
+    // do nothing
+  }
+  else {
+    var newUrl = aboutReaderPrefix + tab.url;
     console.log("Setting new url to " + newUrl);
     tab.url = newUrl;
   }
-});
+  tabPast.add(tab.url);
+  console.log("New tab past: " + setToString(tabPast));
+}
+
+function setToString(s) {
+  return JSON.stringify([...tabPast]);
+}
+
+function urlWithoutReader(url) {
+  if (url.startsWith(aboutReaderPrefix)) {
+    return url.substring(aboutReaderPrefix.length);
+  }
+  return url;
+}
 
 function setEnabledButtonState(button, tab) {
   button.state(tabs.activeTab, {
@@ -60,15 +96,15 @@ function setDisabledButtonState(button, tab) {
   });
 }
 
-function isDomainMatch(url) {
+function isDomainEnabled(url) {
   initStorage();
   var domain = domainFromUrl(url);
   return ss.storage.domains.indexOf(domain) != -1;
 }
 
 function domainFromUrl(url) {
-  if (url.startsWith("about:reader?url=")) {
-    return null;
+  if (url.startsWith(aboutReaderPrefix)) {
+    url = urlWithoutReader(url);
   }
   var r = /:\/\/(.[^/]+)/;
   var matches = url.match(r);
@@ -78,10 +114,10 @@ function domainFromUrl(url) {
   return null;
 }
 
-function storeDomain(url) {
+function addDomain(url) {
   initStorage();
   var domain = domainFromUrl(url);
-
+  console.log("Adding domain " + domain);
   ss.storage.domains.push(domain);
   console.log("Stored domains:");
   console.log(ss.storage.domains);
