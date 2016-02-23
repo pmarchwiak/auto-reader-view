@@ -11,3 +11,4 @@
 - [ ] Add tests
 - [ ] Don't use global variables
 - [ ] Firefox on Android support?
+- [ ] Add hotkey - Cmd-Opt-R?
