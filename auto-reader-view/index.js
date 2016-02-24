@@ -22,8 +22,8 @@ var tabPast = new Set();
 
 var panel = panels.Panel({
   contentURL: self.data.url("panel.html"),
-  height: 80,
-  width: 200,
+  height: 100,
+  width: 250,
   contentScriptFile: self.data.url("panel.js")
 });
 
@@ -73,8 +73,8 @@ function redirectToReaderView(tab) {
     console.log("Was already in Reader View, exit");
     tabPast.delete(ABOUT_READER_PREFIX + origUrl);
   }
-  // Already in reader view
-  else if (origUrl.startsWith(ABOUT_READER_PREFIX)) {
+  // Already in reader view or another about page
+  else if (origUrl.startsWith("about:")) {
     // do nothing
   }
   // Redirect to reader view
