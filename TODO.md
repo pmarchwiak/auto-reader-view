@@ -7,6 +7,7 @@
 - [ ] Prevent addition of special pages such as about:addons
 
 ## Features
+- [ ] Add help docs
 - [ ] Add dialog for viewing saved domains
 - [ ] Add dialog for modifying saved domains
 - [ ] Support (regex?) patterns for urls
@@ -14,5 +15,5 @@
 - [ ] Don't use global variables
 - [ ] Firefox on Android support?
 - [ ] Add hotkey - Cmd-Opt-R?
-- [ ] Disable on site home pages
+- [ ] Disable on site home pages, this will happen automatically?
 - [x] Allow exiting reader view from whitelisted domains

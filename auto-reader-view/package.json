@@ -3,7 +3,7 @@
   "name": "auto-reader-view",
   "version": "0.0.4",
   "description": "Load Reader View automatically on chosen websites.",
-  "icon":"resource://@auto-reader-view/data/miu-book-icon-48.png",
+  "icon": "resource://@auto-reader-view/data/miu-book-icon-48.png",
   "main": "index.js",
   "author": "Patrick Marchwiak",
   "engines": {
