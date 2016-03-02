@@ -1,5 +1,7 @@
 #Auto Reader View
-Load Reader View automatically on chosen websites
+A Firefox add-on for loading Reader View automatically on chosen websites.
+
+Get it here: https://addons.mozilla.org/en-US/firefox/addon/auto-reader-view/
 
 ## Usage
 Firefox's Reader View feature strips away clutter from web pages for improved readabilty. In order to switch to this view, users must manually click the Reader View icon in the address bar. This can be a minor inconvenience when Reader View is consistently used for the same web sites.
