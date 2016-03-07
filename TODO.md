@@ -3,8 +3,9 @@
 ## Bugs
 - [ ] Prevent loop when reader view doesn't work
 - [ ] Fix whitelisted domain, readerView -> exit -> readerView -> exit in same tab
-- [x] Badge doesn't update to red minus occasionally
+- [ ] Allow enabling for a domain when a page is already in reader view
 - [ ] Prevent addition of special pages such as about:addons
+- [x] Badge doesn't update to red minus occasionally
 
 ## Features
 - [ ] Add help docs
