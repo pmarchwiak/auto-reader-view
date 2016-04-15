@@ -8,7 +8,7 @@ Firefox's Reader View feature strips away clutter from web pages for improved re
 
 This add-on allows users to automatically open Reader View for chosen websites. When the add-on button is clicked, a panel will open that allows the user to change the preference for the current domain.
 
-To enable Auto Reader View For a new site, click the Auto Reader View button ( [!book icon](https://raw.githubusercontent.com/pmarchwiak/auto-reader-view/master/auto-reader-view/data/miu-book-icon-32.png) - it looks like a book) to open the panel, then click "Enable". When clicked, this will save the preference for that domain and a green checkbox will appear on the add-on button. Any future tabs opened for that domain will switch to Reader View automatically. Note that the Close Reader View button continues to work if the user needs to switch back to the normal view for that page.
+To enable Auto Reader View For a new site, click the Auto Reader View button [!book icon](https://raw.githubusercontent.com/pmarchwiak/auto-reader-view/master/auto-reader-view/data/miu-book-icon-32.png) (it looks like a book) to open the panel, then click "Enable". When clicked, this will save the preference for that domain and a green checkbox will appear on the add-on button. Any future tabs opened for that domain will switch to Reader View automatically. Note that the Close Reader View button continues to work if the user needs to switch back to the normal view for that page.
 
 To remove the preference for a domain, navigate to a page from that site. Click the Auto Reader View button to open the panel, then click "Disable".
 
