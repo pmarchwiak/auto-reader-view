@@ -41,14 +41,14 @@ function submitClicked(event) {
 function setEnabledState(domain, btn, prompt) {
   btn.style.display = '';
   btn.value = "Disable";
-  replacePromptText(prompt, "", domain,
+  replacePromptText(prompt, "Pages from ", domain,
       " will automatically open in Reader View.");
 }
 
 function setDisabledState(domain, btn, prompt) {
   btn.style.display = '';
   btn.value = "Enable";
-  replacePromptText(prompt, "Always open ", domain, " in Reader View?")
+  replacePromptText(prompt, "Always open pages from ", domain, " in Reader View?")
 }
 
 function setUnsupportedState(btn, prompt) {

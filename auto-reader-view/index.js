@@ -4,8 +4,9 @@ var panels = require("sdk/panel");
 var self = require("sdk/self");
 var ss = require("sdk/simple-storage");
 var tabs = require("sdk/tabs");
+var uu = require("./lib/url-utils.js");
 
-var ABOUT_READER_PREFIX = "about:reader?url=";
+var ABOUT_READER_PREFIX = uu.ABOUT_READER_PREFIX;
 
 var button = buttons.ActionButton({
   id: "auto-reader-view-link",
@@ -33,7 +34,12 @@ tabs.on('load', function(tab) {
   if (tab.url && isDomainEnabled(tab.url)) {
     console.log("Auto reader enabled for " + tab.url);
     setEnabledButtonState(button, tab);
-    redirectToReaderView(tab);
+    if (!uu.isUrlHomePage(tab.url)) {
+      redirectToReaderView(tab);
+    }
+  }
+  else {
+    setDisabledButtonState(button, tab);
   }
 });
 
@@ -41,7 +47,7 @@ tabs.on('load', function(tab) {
 function openPanel(btnState) {
   panel.port.emit("panelOpened", {
     enabled: isDomainEnabled(tabs.activeTab.url),
-    domain: domainFromUrl(tabs.activeTab.url)
+    domain: uu.domainFromUrl(tabs.activeTab.url)
   });
   panel.show({
     position: button
@@ -55,7 +61,9 @@ panel.port.on("domainChange", function(data) {
   if (data.enabled) {
     addDomain(data.domain);
     setEnabledButtonState(button, tabs.activeTab);
-    redirectToReaderView(tabs.activeTab);
+    if (!uu.isUrlHomePage(tabs.activeTab.url)) {
+      redirectToReaderView(tabs.activeTab);
+    }
   }
   else {
     removeDomain(data.domain);
@@ -111,13 +119,6 @@ function setToString(s) {
   return JSON.stringify([...tabPast]);
 }
 
-// Strip reader prefix from url
-function urlWithoutReader(url) {
-  if (url.startsWith(ABOUT_READER_PREFIX)) {
-    return url.substring(ABOUT_READER_PREFIX.length);
-  }
-  return url;
-}
 
 // Add a checkmark badge to indicate the reader view is enabled
 function setEnabledButtonState(button, tab, panel) {
@@ -135,23 +136,12 @@ function setDisabledButtonState(button, tab) {
   });
 }
 
-// Extract domain from a url
-function domainFromUrl(url) {
-  if (url.startsWith(ABOUT_READER_PREFIX)) {
-    url = urlWithoutReader(url);
-  }
-  var r = /:\/\/(.[^/]+)/;
-  var matches = url.match(r);
-  if (matches && matches.length >= 2) {
-    return matches[1];
-  }
-  return null;
-}
+
 
 // Check storage for the domain
 function isDomainEnabled(url) {
   initStorage();
-  var domain = domainFromUrl(url);
+  var domain = uu.domainFromUrl(url);
   return ss.storage.domains.indexOf(domain) != -1;
 }
 
@@ -179,12 +169,3 @@ function initStorage() {
     ss.storage.domains = [];
   }
 }
-
-// TODO add tests
-// a dummy function, to show how tests work.
-// to see how to test this function, look at test/test-index.js
-// function dummy(text, callback) {
-//   callback(text);
-// }
-//
-// exports.dummy = dummy;
