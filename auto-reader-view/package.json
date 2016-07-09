@@ -1,7 +1,7 @@
 {
   "title": "Auto Reader View",
   "name": "auto-reader-view",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Load Reader View automatically on chosen websites.",
   "icon": "resource://@auto-reader-view/data/miu-book-icon-48.png",
   "main": "index.js",
