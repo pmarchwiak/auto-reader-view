@@ -1,0 +1,19 @@
+html, body {
+  /*width: 100px;*/
+}
+
+div {
+  margin: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.button {
+  margin: 3% auto;
+  padding: 4px;
+  text-align: center;
+  font-size: 1.2em;
+  cursor: pointer;
+}
