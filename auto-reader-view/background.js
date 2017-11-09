@@ -5,7 +5,10 @@ var currentBookmark;
  * Updates the browserAction icon.
  */
 function updateIcon() {
-  browser.browserAction.setIcon({
+  console.log("Updating icon");
+  // TODO Update icon to represent enabled state
+
+  // browser.browserAction.setIcon({
     // path: currentBookmark ? {
     //   19: "icons/star-filled-19.png",
     //   38: "icons/star-filled-38.png"
@@ -13,27 +16,20 @@ function updateIcon() {
     //   19: "icons/star-empty-19.png",
     //   38: "icons/star-empty-38.png"
     // },
-		path: {
-			"16": "icons/miu-book-icon-16.png",
-		  "32": "icons/miu-book-icon-32.png",
-		  "64": "icons/miu-book-icon-64.png"
-		}
-    // tabId: currentTab.id
-  });
-  browser.browserAction.setTitle({
-    // Screen readers can see the title
-    title: 'Auto Reader View'
-    // title: currentBookmark ? 'Unbookmark it!' : 'Bookmark it!',
-    // tabId: currentTab.id
-  });
-	browser.browserAction.setPopup({popup: "/popup/panel.html"});
-	browser.browserAction.onClicked.addListener(browserActionClicked);
+   // tabId: currentTab.id
+  // });
 }
 
-function browserActionClicked(tab) {
+function browserActionClicked() {
+  console.log("browserActionClicked");
+}
+browser.browserAction.onClicked.addListener(browserActionClicked);
+
+function browserActionClicked2(tab) {
+  console.log("Action clicked");
 	var domain = domainFromUrl(tab.url);
 	isDomainEnabled(domain).then(enabled => {
-	console.log("browserActionClicked");
+	  console.log("is domain enabled responded");
 		browser.runtime.sendMessage({
 			"type": "browserActionClicked",
 			"domain": domain,
@@ -44,19 +40,18 @@ function browserActionClicked(tab) {
 
 function handleMessage(msg) {
   console.log("received message", msg);
-	// if (msg.type == 'domainState') {
-	// 	// return the current domain and its state
-	// 	return browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT})
-	// 		.then(tabs => browser.tabs.get(tabs[0].id))
-	// 		.then(tab => {
-	// 			var domain = domainFromUrl(tab.url);
-	// 			return isDomainEnabled(tab.url).then(enabled => {
-	// 				return {"enabled": enabled, "domain": domain};
-	// 			});
-	// 		});
-	// }
-  if (msg.type == 'domainChange') {
-
+	if (msg.type == 'domainState') {
+		// return the current domain and its state
+		return browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT})
+			.then(tabs => browser.tabs.get(tabs[0].id))
+			.then(tab => {
+				var domain = domainFromUrl(tab.url);
+				return isDomainEnabled(tab.url).then(enabled => {
+					return {"enabled": enabled, "domain": domain};
+				});
+			});
+	}
+  else if (msg.type == 'domainChange') {
     browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT})
       .then(tabs => browser.tabs.get(tabs[0].id))
       .then(tab => {
@@ -162,6 +157,8 @@ function domainFromUrl(url) {
 }
 
 console.log("background script started");
+console.log("add on click");
+
 updateIcon();
 browser.runtime.onMessage.addListener(handleMessage);
 

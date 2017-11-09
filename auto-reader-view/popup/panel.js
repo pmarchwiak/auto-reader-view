@@ -31,7 +31,7 @@ function submitClicked(event) {
   var isEnabled = (btn.value == "Enable");
 	var domain = getDomainInput().value;
 	updatePanelUi(domain, isEnabled);
-	
+
   browser.runtime.sendMessage({
     type: "domainChange",
     enabled: isEnabled
@@ -72,11 +72,14 @@ function replacePromptText(prompt, part1, domain, part2) {
   var domainText = document.createTextNode(domain);
   b.appendChild(domainText);
 
-  var text2 = document.createTextNode(part2);
 
   prompt.appendChild(text1);
   prompt.appendChild(b);
-  prompt.appendChild(text2);
+
+  if (part2) {
+    var text2 = document.createTextNode(part2);
+    prompt.appendChild(text2);
+  }
 }
 
 function handlePanelOpened(msg) {
@@ -89,14 +92,9 @@ function handlePanelOpened(msg) {
 browser.runtime.onMessage.addListener(handlePanelOpened);
 
 console.log("Loaded panel.js");
-// browser.runtime.sendMessage({"type": "domainState"}).then(resp => {
-// 		console.log("received resp", resp);
-// 		var domain = resp.domain;
-// 		var isEnabled = resp.enabled;
-// 		if (isEnabled) {
-// 			setEnabledState(domain);
-// 		}
-// 		else {
-// 			setDisabledState(domain);
-// 		}
-// });
+browser.runtime.sendMessage({"type": "domainState"}).then(resp => {
+		console.log("received resp", resp);
+		var domain = resp.domain;
+		var isEnabled = resp.enabled;
+    updatePanelUi(resp.domain, resp.enabled)  ;
+});
