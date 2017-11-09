@@ -11,8 +11,13 @@ function reportExecuteScriptError(error) {
 function getButton() {
   return document.getElementById("submitButton");
 }
+
 function getPrompt() {
   return document.getElementById("panelPrompt");
+}
+
+function getDomainInput() {
+	return document.getElementById("domainInput");
 }
 
 getButton().addEventListener("click", (e) => {
@@ -20,31 +25,39 @@ getButton().addEventListener("click", (e) => {
   submitClicked(e);
 });
 
-console.log("Loaded panel.js");
 
 function submitClicked(event) {
   var btn = event.target;
   var isEnabled = (btn.value == "Enable");
-  if (isEnabled) {
-    setEnabledState();
-  }
-  else {
-    setDisabledState();
-  }
-
+	var domain = getDomainInput().value;
+	updatePanelUi(domain, isEnabled);
+	
   browser.runtime.sendMessage({
     type: "domainChange",
     enabled: isEnabled
   });
 }
 
-function setEnabledState() {
+function updatePanelUi(domain, isEnabled) {
+	isEnabled ? setEnabledState(domain) : setDisabledState(domain);
+}
+
+function setEnabledState(domain) {
   var btn = getButton();
   btn.style.display = '';
   btn.value = "Disable";
-  var domain = "TODO";
-  replacePromptText(getPrompt(), "Pages from ", domain,
-      " will automatically open in Reader View.");
+	getDomainInput().value = domain;
+  replacePromptText(getPrompt(),
+		`Pages from ${domain} will automatically open in Reader View.`);
+}
+
+function setDisabledState(domain) {
+	var btn = getButton();
+  btn.style.display = '';
+  btn.value = "Enable";
+	getDomainInput().value = domain;
+  replacePromptText(getPrompt(),
+		`Always open pages from ${domain} in Reader View?`);
 }
 
 function replacePromptText(prompt, part1, domain, part2) {
@@ -65,3 +78,25 @@ function replacePromptText(prompt, part1, domain, part2) {
   prompt.appendChild(b);
   prompt.appendChild(text2);
 }
+
+function handlePanelOpened(msg) {
+	console.log("Received message", msg);
+	if (msg.type === "browserActionClicked") {
+		updatePanelUi(msg.domain, msg.isEnabled);
+	}
+}
+
+browser.runtime.onMessage.addListener(handlePanelOpened);
+
+console.log("Loaded panel.js");
+// browser.runtime.sendMessage({"type": "domainState"}).then(resp => {
+// 		console.log("received resp", resp);
+// 		var domain = resp.domain;
+// 		var isEnabled = resp.enabled;
+// 		if (isEnabled) {
+// 			setEnabledState(domain);
+// 		}
+// 		else {
+// 			setDisabledState(domain);
+// 		}
+// });
