@@ -15,7 +15,7 @@ function submitClicked(event) {
   var btn = event.target;
   var isEnabled = (btn.value == "Enable");
 	var domain = getDomainInput().value;
-	updatePanelUi(domain, isEnabled);
+	updatePanelUi(true, domain, isEnabled);
 
   browser.runtime.sendMessage({
     type: "domainChange",
@@ -24,43 +24,59 @@ function submitClicked(event) {
   });
 }
 
-function updatePanelUi(domain, isEnabled) {
-	isEnabled ? setEnabledState(domain) : setDisabledState(domain);
+function updatePanelUi(isValid, domain, isEnabled) {
+  if (!isValid) {
+    setInvalidState();
+  }
+  else if (isEnabled) {
+	  setEnabledState(domain);
+  }
+  else {
+    setDisabledState(domain);
+  }
+}
+
+function setInvalidState() {
+  var btn = getButton();
+  btn.value = "Enable";
+  btn.setAttribute("disabled", "");
+  replacePromptText(`"about:" pages cannot be opened in Reader View`);
 }
 
 function setEnabledState(domain) {
   var btn = getButton();
-  btn.style.display = '';
+  // btn.style.display = '';
   btn.value = "Disable";
+  btn.removeAttribute("disabled");
 	getDomainInput().value = domain;
-  replacePromptText(getPrompt(),
-		"Pages from ", domain, " will automatically open in Reader View");
+  replacePromptText("Pages from ", domain, " will automatically open in Reader View");
 }
 
 function setDisabledState(domain) {
 	var btn = getButton();
-  btn.style.display = '';
+  // btn.style.display = '';
   btn.value = "Enable";
+  btn.removeAttribute("disabled");
 	getDomainInput().value = domain;
-  replacePromptText(getPrompt(),
-		"Always open pages from ", domain, " in Reader View?");
+  replacePromptText("Always open pages from ", domain, " in Reader View?");
 }
 
-function replacePromptText(prompt, part1, domain, part2) {
+function replacePromptText(part1, domain = null, part2 = null) {
+  var prompt = getPrompt();
   // clear out prompt text
   while (prompt.firstChild) prompt.removeChild(prompt.firstChild);
 
   // TODO use a library / templating here instead
 
   var text1 = document.createTextNode(part1);
-
-  var b = document.createElement("b");
-  var domainText = document.createTextNode(domain);
-  b.appendChild(domainText);
-
-
   prompt.appendChild(text1);
-  prompt.appendChild(b);
+
+  if (domain) {
+    var b = document.createElement("b");
+    var domainText = document.createTextNode(domain);
+    b.appendChild(domainText);
+    prompt.appendChild(b);
+  }
 
   if (part2) {
     var text2 = document.createTextNode(part2);
@@ -82,7 +98,11 @@ browser.runtime.onMessage.addListener(handlePanelOpened);
 
 browser.runtime.sendMessage({"type": "domainState"}).then(resp => {
 		console.log("received resp", resp);
-		var domain = resp.domain;
-		var isEnabled = resp.enabled;
-    updatePanelUi(resp.domain, resp.enabled);
+    var domain = null;
+    var isEnabled = null;
+    if (resp.valid) {
+      domain = resp.domain;
+      isEnabled = resp.enabled;
+    }
+    updatePanelUi(resp.valid, resp.domain, resp.enabled);
 });

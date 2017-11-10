@@ -4,18 +4,17 @@ var tabPast = new Set();
 /*
  * Updates the browserAction icon.
  */
-function updateIcon() {
+function updateIcon(enabled) {
   console.log("Updating icon");
-  // TODO Update icon to represent enabled state
-
-  // browser.browserAction.setIcon({
-    // path: currentBookmark ? {
-    //   19: "icons/star-filled-19.png",
-    // } : {
-    //   19: "icons/star-empty-19.png",
-    // },
-   // tabId: currentTab.id
-  // });
+  if (enabled) {
+    browser.browserAction.setBadgeText({text: "✓"});
+    // browser.browserAction.setBadgeText("✓");
+    browser.browserAction.setBadgeBackgroundColor({color: "green"});
+  }
+  else {
+    browser.browserAction.setBadgeText({text: ""});
+    browser.browserAction.setBadgeBackgroundColor({color: ""});
+  }
 }
 
 function handleMessage(msg) {
@@ -26,10 +25,14 @@ function handleMessage(msg) {
 		return browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT})
 			.then(tabs => browser.tabs.get(tabs[0].id))
 			.then(tab => {
+        if (isNonReaderAboutPage(tab.url)) {
+          return {"valid": false};
+        }
 				var domain = domainFromUrl(tab.url);
         console.log(`Checking enabled status for ${domain}`);
 				return isDomainEnabled(domain).then(enabled => {
-					return {"enabled": enabled, "domain": domain};
+          updateIcon(enabled);
+					return {"enabled": enabled, "domain": domain, "valid": true};
 				});
 			});
 	}
@@ -51,6 +54,19 @@ function handleMessage(msg) {
       });
   }
 }
+
+function handleTabSwitch() {
+  return browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT})
+    .then(tabs => browser.tabs.get(tabs[0].id))
+    .then(tab => {
+      var domain = domainFromUrl(tab.url);
+      console.log(`Checking enabled status for ${domain}`);
+      return isDomainEnabled(domain).then(enabled => {
+        updateIcon(enabled);
+      });
+    });
+}
+
 
 // Check storage for the domain
 // @return {Promise<Boolean>}
@@ -130,6 +146,7 @@ function handleTabUpdate(tabId, changeInfo, tab) {
     var domain = domainFromUrl(tab.url);
     console.log(`Domain for updated tab ${tab.id} is ${domain}`);
     isDomainEnabled(domain).then(isEnabled => {
+      updateIcon(isEnabled);
       if(isEnabled) {
         console.log(`Auto reader enabled for ${domain}`);
         // TODO update icon state
@@ -189,6 +206,10 @@ function readerToNormalUrl(readerUrl) {
   return decodeURIComponent(readerUrl.substr("about:reader?url=".length));
 }
 
+function isNonReaderAboutPage(url) {
+    return url.startsWith("about:") && !url.startsWith("about:reader");
+}
+
 function isUrlHomePage(url) {
   var domain = domainFromUrl(url);
   var endOfDomainPartIdx = url.indexOf(domain) + domain.length;
@@ -211,10 +232,10 @@ initStorage().then(() => {
 
   // Listen to tab URL changes
   browser.tabs.onUpdated.addListener(handleTabUpdate);
-});
 
-// // listen to tab switching
-// browser.tabs.onActivated.addListener(updatePanel);
-//
-// // listen for window switching
-// browser.windows.onFocusChanged.addListener(updatePanel);
+  // listen to tab switching
+  browser.tabs.onActivated.addListener(handleTabSwitch);
+
+  // listen for window switching
+  browser.windows.onFocusChanged.addListener(handleTabSwitch);
+});
