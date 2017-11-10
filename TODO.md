@@ -1,6 +1,7 @@
 # TODO
 
 ## Bugs
+- [ ] Fix "Error: The specified tab cannot be placed into reader mode." when opening enabled tabs in background
 - [ ] Prevent loop when reader view doesn't work
 - [ ] Fix whitelisted domain, readerView -> exit -> readerView -> exit in same tab
 - [ ] Allow enabling for a domain when a page is already in reader view

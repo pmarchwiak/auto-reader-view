@@ -1,13 +1,3 @@
-/**
- * There was an error executing the script.
- * Display the popup's error message, and hide the normal UI.
- */
-function reportExecuteScriptError(error) {
-  document.querySelector("#popup-content").classList.add("hidden");
-  document.querySelector("#error-content").classList.remove("hidden");
-  console.error('Failed to execute beastify content script: ${error.message}');
-}
-
 function getButton() {
   return document.getElementById("submitButton");
 }
@@ -20,13 +10,8 @@ function getDomainInput() {
 	return document.getElementById("domainInput");
 }
 
-getButton().addEventListener("click", (e) => {
-  console.log("submitButton clicked");
-  submitClicked(e);
-});
-
-
 function submitClicked(event) {
+  console.log("submitButton clicked");
   var btn = event.target;
   var isEnabled = (btn.value == "Enable");
 	var domain = getDomainInput().value;
@@ -34,7 +19,8 @@ function submitClicked(event) {
 
   browser.runtime.sendMessage({
     type: "domainChange",
-    enabled: isEnabled
+    enabled: isEnabled,
+    "domain": domain
   });
 }
 
@@ -89,12 +75,14 @@ function handlePanelOpened(msg) {
 	}
 }
 
+console.log("Loaded panel.js");
+
+getButton().addEventListener("click", submitClicked);
 browser.runtime.onMessage.addListener(handlePanelOpened);
 
-console.log("Loaded panel.js");
 browser.runtime.sendMessage({"type": "domainState"}).then(resp => {
 		console.log("received resp", resp);
 		var domain = resp.domain;
 		var isEnabled = resp.enabled;
-    updatePanelUi(resp.domain, resp.enabled)  ;
+    updatePanelUi(resp.domain, resp.enabled);
 });

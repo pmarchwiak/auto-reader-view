@@ -4,6 +4,12 @@
   "description": "Enable Reader Mode automatically on chosen websites",
   "version": "1.0",
   "homepage_url": "https://github.com/pmarchwiak/auto-reader-view",
+  "applications": {
+    "gecko": {
+      "id": "auto-reader-view@marchwiak.com"
+    }
+  },
+
   "icons": {
     "48": "icons/miu-book-icon-48.png"
   },
