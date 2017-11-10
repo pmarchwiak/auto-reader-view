@@ -20,11 +20,6 @@ function updateIcon() {
   // });
 }
 
-function browserActionClicked() {
-  console.log("browserActionClicked");
-}
-browser.browserAction.onClicked.addListener(browserActionClicked);
-
 function browserActionClicked2(tab) {
   console.log("Action clicked");
 	var domain = domainFromUrl(tab.url);
@@ -93,9 +88,8 @@ function handleMessage(msg) {
 
 // Check storage for the domain
 // @return {Promise<Boolean>}
-function isDomainEnabled(url) {
+function isDomainEnabled(domain) {
   return initStorage().then(() => {
-    var domain = domainFromUrl(url);
     return getStorage().get("enabledDomains").then(result => {
       return result.enabledDomains.indexOf(domain) >= 0;
   	});
@@ -161,6 +155,76 @@ function domainFromUrl(url) {
   return null;
 }
 
+function handleTabUpdate(tabId, changeInfo, tab) {
+  console.log("Handling tab update", changeInfo.status);
+  if (changeInfo.status === "complete") {
+    var domain = domainFromUrl(tab.url);
+    console.log(`Domain for updated tab ${tab.id} is ${domain}`);
+    isDomainEnabled(domain).then(isEnabled => {
+      if(isEnabled) {
+        console.log(`Auto reader enabled for ${domain}`);
+        // TODO update icon state
+        tryToggleReaderView(tab);
+      }
+    })
+  }
+}
+
+var tabPast = new Set();
+
+function tryToggleReaderView(tab) {
+  // Detect user exiting reader view temporarily, don't toggle back
+  if (!tab.isInReaderMode && tabPast.has(normalToReaderUrl(tab.url))) {
+    console.log("Was previously in Reader View");
+    tabPast.delete(normalToReaderUrl(tab.url));
+  }
+  // Already in reader view
+  else if (tab.isInReaderMode) {
+    // do nothing
+  }
+  else {
+    browser.tabs.toggleReaderMode(tab.id).catch(onError);
+  }
+
+  // Store the previous urls in order to detect reader view "exits"
+  tabPast.add(tab.url);
+
+  // Housekeeping to prevent unbounded memory use
+  if (tabPast.size > 50) {
+    // TODO use an LRU cache instead
+    console.log("tabPast size is " + tabPast.size + ". Clearing entries.");
+    freeCache(tabPast, 5);
+  }
+  console.log("New tab past: " + setToString(tabPast));
+}
+
+function freeCache(set, numToRemove) {
+  // remove least recently inserted entries
+  // TODO use an LRU cache instead
+  var iter = tabPast.values()
+  for (var i = 0; i < numToRemove; i++) {
+    var val = iter.next().value;
+    set.delete(val);
+  }
+}
+
+// No built-in pretty printing for Set :(
+function setToString(s) {
+  return JSON.stringify([...tabPast]);
+}
+
+function normalToReaderUrl(url) {
+  return "about:reader?url=" + encodeURIComponent(url);
+}
+
+function readerToNormalUrl(readerUrl) {
+  return decodeURIComponent(readerUrl.substr("about:reader?url=".length));
+}
+
+function onError(err) {
+    console.log(err);
+}
+
 console.log("background script started");
 console.log("add on click");
 
@@ -168,7 +232,7 @@ updateIcon();
 browser.runtime.onMessage.addListener(handleMessage);
 
 // listen to tab URL changes
-// browser.tabs.onUpdated.addListener(updatePanel);
+browser.tabs.onUpdated.addListener(handleTabUpdate);
 //
 // // listen to tab switching
 // browser.tabs.onActivated.addListener(updatePanel);
