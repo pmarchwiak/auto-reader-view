@@ -48,7 +48,7 @@ function setEnabledState(domain) {
   btn.value = "Disable";
 	getDomainInput().value = domain;
   replacePromptText(getPrompt(),
-		`Pages from ${domain} will automatically open in Reader View.`);
+		"Pages from ", domain, " will automatically open in Reader View");
 }
 
 function setDisabledState(domain) {
@@ -57,7 +57,7 @@ function setDisabledState(domain) {
   btn.value = "Enable";
 	getDomainInput().value = domain;
   replacePromptText(getPrompt(),
-		`Always open pages from ${domain} in Reader View?`);
+		"Always open pages from ", domain, "in Reader View?");
 }
 
 function replacePromptText(prompt, part1, domain, part2) {

@@ -94,11 +94,12 @@ function handleMessage(msg) {
 // Check storage for the domain
 // @return {Promise<Boolean>}
 function isDomainEnabled(url) {
-  initStorage();
-  var domain = domainFromUrl(url);
-  return getStorage().get("enabledDomains").then(result => {
-    return result.enabledDomains.indexOf(domain) >= 0;
-	});
+  return initStorage().then(() => {
+    var domain = domainFromUrl(url);
+    return getStorage().get("enabledDomains").then(result => {
+      return result.enabledDomains.indexOf(domain) >= 0;
+  	});
+  });
 }
 
 // Add a domain to storage
@@ -108,7 +109,7 @@ function addDomain(domain) {
   getStorage().get("enabledDomains").then(domains => {
     console.log("retrieved domains", domains);
     domains.enabledDomains.push(domain);
-    getStorage().set({"enabledDomains": domains});
+    getStorage().set({"enabledDomains": domains.enabledDomains});
     console.log("Stored domains:");
     console.log(domains);
   });
@@ -118,19 +119,20 @@ function addDomain(domain) {
 function removeDomain(domain) {
   initStorage();
   console.log("Removing domain " + domain);
-  getStorage().get("enabledDomains").then(domains => {
-    var i = domains.indexOf(domain);
-    delete domains[i];
-    getStorage().set({"enabledDomains": domains});
+  getStorage().get("enabledDomains").then(result => {
+    var i = result.enabledDomains.indexOf(domain);
+    delete result.enabledDomains[i];
+    getStorage().set({"enabledDomains": result.enabledDomains});
     console.log("Updated domains:");
-    console.log(domains);
+    console.log(result.enabledDomains);
   });
 }
 
 // Initialize storage if not already done so.
+// @return {Promise}
 function initStorage() {
   var store = getStorage();
-  store.get("enabledDomains").then(domains => {
+  return store.get("enabledDomains").then(domains => {
     if (isObjectEmpty(domains)) {
       console.log("Found domains, but null");
       store.set({"enabledDomains": new Array()});
@@ -148,6 +150,9 @@ function getStorage() {
 
 // Extract domain from a url
 function domainFromUrl(url) {
+  if (url.startsWith("about:reader?")) {
+    url = decodeURIComponent(url.substr("about:reader?url=".length));
+  }
   var r = /:\/\/(.[^/]+)/;
   var matches = url.match(r);
   if (matches && matches.length >= 2) {
