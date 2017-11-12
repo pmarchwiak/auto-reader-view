@@ -55,16 +55,19 @@ function handleMessage(msg) {
   }
 }
 
-function handleTabSwitch() {
-  return browser.tabs.query({active: true, windowId: browser.windows.WINDOW_ID_CURRENT})
-    .then(tabs => browser.tabs.get(tabs[0].id))
-    .then(tab => {
-      var domain = domainFromUrl(tab.url);
-      console.log(`Checking enabled status for ${domain}`);
-      return isDomainEnabled(domain).then(enabled => {
-        updateIcon(enabled);
+function handleTabSwitch(activeInfo) {
+  console.log(`Tab ${activeInfo.tabId} was activated`);
+  if (activeInfo.tabId) {
+    return browser.tabs.get(activeInfo.tabId)
+      .then(tab => {
+        var domain = domainFromUrl(tab.url);
+        console.log(`Checking enabled status for ${domain}`);
+        return isDomainEnabled(domain).then(enabled => {
+          updateIcon(enabled);
+          return enabled;
+        });
       });
-    });
+  }
 }
 
 
@@ -73,7 +76,7 @@ function handleTabSwitch() {
 function isDomainEnabled(domain) {
   return getStorage().get("enabledDomains").then(result => {
     console.log("Enabled domains are:", result.enabledDomains);
-    isEnabled = result.enabledDomains.indexOf(domain) >= 0;
+    var isEnabled = result.enabledDomains.indexOf(domain) >= 0;
     console.log(`${domain} enabled: ${isEnabled}`);
     return isEnabled;
 	});
@@ -141,15 +144,14 @@ function domainFromUrl(url) {
 }
 
 function handleTabUpdate(tabId, changeInfo, tab) {
-  console.log(`Handling tab update for tab ${tabId} ${tab.url}, status: ${changeInfo.status}`);
-  if (changeInfo.status === "complete") {
+  console.log(`Handling tab update for tab ${tabId} ${tab.url}, status: ${changeInfo.status}`, changeInfo);
+  if (changeInfo && changeInfo.isArticle) {
     var domain = domainFromUrl(tab.url);
     console.log(`Domain for updated tab ${tab.id} is ${domain}`);
     isDomainEnabled(domain).then(isEnabled => {
       updateIcon(isEnabled);
       if(isEnabled) {
         console.log(`Auto reader enabled for ${domain}`);
-        // TODO update icon state
         tryToggleReaderView(tab);
       }
     })
@@ -167,12 +169,12 @@ function tryToggleReaderView(tab) {
     // do nothing
   }
   else {
-    console.log(`Toggling reader mode for ${tab.id} ${tab.url}`);
+    console.log(`Toggling reader mode for ${tab.id} ${tab.url} (isArticle? ${tab.isArticle})`);
     browser.tabs.toggleReaderMode(tab.id).catch(onError);
   }
 
   // Store the previous urls in order to detect reader view "exits"
-  tabPast.add(tab.url);
+  tabPast.add(normalToReaderUrl(tab.url));
 
   // Housekeeping to prevent unbounded memory use
   if (tabPast.size > 50) {
@@ -199,7 +201,10 @@ function setToString(s) {
 }
 
 function normalToReaderUrl(url) {
-  return "about:reader?url=" + encodeURIComponent(url);
+  if (!url.startsWith("about:reader")) {
+    url = "about:reader?url=" + encodeURIComponent(url);
+  }
+  return url;
 }
 
 function readerToNormalUrl(readerUrl) {
