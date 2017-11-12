@@ -8,7 +8,6 @@ function updateIcon(enabled) {
   console.log("Updating icon");
   if (enabled) {
     browser.browserAction.setBadgeText({text: "✓"});
-    // browser.browserAction.setBadgeText("✓");
     browser.browserAction.setBadgeBackgroundColor({color: "green"});
   }
   else {
@@ -43,14 +42,12 @@ function handleMessage(msg) {
       .then(tab => {
         if (msg.enabled) {
           addDomain(msg.domain);
-          if (tab.isArticle) {
-            tryToggleReaderView(tab);
-          }
+          tryToggleReaderView(tab);
         }
         else {
           removeDomain(msg.domain);
-          // setDisabledButtonState(button, tabs.activeTab);
         }
+        updateIcon(msg.enabled);
       });
   }
 }
@@ -144,8 +141,9 @@ function domainFromUrl(url) {
 }
 
 function handleTabUpdate(tabId, changeInfo, tab) {
-  console.log(`Handling tab update for tab ${tabId} ${tab.url}, status: ${changeInfo.status}`, changeInfo);
-  if (changeInfo && changeInfo.isArticle) {
+  // console.log(`Handling tab update for tab ${tabId} ${tab.url}, status: ${changeInfo.status}`, changeInfo);
+  if ((changeInfo && changeInfo.isArticle) ||
+      (tab && tab.isArticle)) {
     var domain = domainFromUrl(tab.url);
     console.log(`Domain for updated tab ${tab.id} is ${domain}`);
     isDomainEnabled(domain).then(isEnabled => {
