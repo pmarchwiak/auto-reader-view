@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "auto-reader-view",
   "description": "Enable Reader Mode automatically on chosen websites",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage_url": "https://github.com/pmarchwiak/auto-reader-view",
   "applications": {
     "gecko": {
