@@ -12,7 +12,7 @@ function updateIcon(enabled) {
   }
   else {
     browser.browserAction.setBadgeText({text: ""});
-    browser.browserAction.setBadgeBackgroundColor({color: ""});
+    browser.browserAction.setBadgeBackgroundColor({color: null});
   }
 }
 
@@ -98,10 +98,17 @@ function removeDomain(domain) {
   getStorage().get("enabledDomains").then(result => {
     var i = result.enabledDomains.indexOf(domain);
     delete result.enabledDomains[i];
+    result.enabledDomains = result.enabledDomains.filter(Boolean);
     getStorage().set({"enabledDomains": result.enabledDomains});
     console.log("Updated domains:");
     console.log(result.enabledDomains);
   });
+}
+
+function saveDomainsList(domainsList) {
+  console.log("Saving domains list", domainsList);
+  getStorage().set({"enabledDomains": domainsList});
+  console.log("Saved domains list")
 }
 
 function getStorage() {

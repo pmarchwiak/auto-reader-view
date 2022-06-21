@@ -29,6 +29,10 @@
     },
     "default_title": "Auto Reader Mode",
     "default_popup": "popup/panel.html"
-  }
+  },
 
+  "options_ui": {
+    "page": "options/options.html",
+    "browser_style": true
+  }
 }
