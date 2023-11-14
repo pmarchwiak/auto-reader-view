@@ -1,4 +1,4 @@
-#Auto Reader View
+# Auto Reader View
 A Firefox add-on for loading Reader View automatically on chosen websites.
 
 Get it here: https://addons.mozilla.org/en-US/firefox/addon/auto-reader-view/
